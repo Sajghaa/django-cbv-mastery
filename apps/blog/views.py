@@ -21,3 +21,15 @@ class PostListView(ListView):
             queryset =  queryset.filter(category_slug=category_slug)
 
         return queryset
+
+class PostDetailView(DetailView):
+    model = Post
+    template_name = "blog/post_detail.html"
+    context_object_name = "post"
+
+    def get_queryset(self):
+        return (
+            Post.objects
+             .filter(status='published')
+             .select_related('author', 'category')
+        )
