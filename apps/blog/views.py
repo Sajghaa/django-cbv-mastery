@@ -1,13 +1,49 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.urls import reverse_lazy
-from django.views.generic import CreateView, UpdateView, DeleteView
 from django.contrib.messages.views import SuccessMessageMixin
-from .models import Post
-from django.utils.text import slugify
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib import messages
+from django.utils.text import slugify
+from .models import Post
 
 
-# Create View
+# PUBLIC VIEWS
+class PostListView(ListView):
+    model = Post
+    template_name = "blog/post_list.html"
+    context_object_name = "posts"
+    paginate_by = 5
+
+    def get_queryset(self):
+        queryset = (
+            Post.objects
+            .filter(status='published')
+            .select_related('author', 'category')
+        )
+
+        category_slug = self.request.GET.get('category')
+
+        if category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
+
+        return queryset
+
+class PostDetailView(DetailView):
+    model = Post
+    template_name = "blog/post_detail.html"
+    context_object_name = "post"
+
+    def get_queryset(self):
+        # Security: Only show published posts to public
+        # Authors can see their own drafts via the edit view
+        return (
+            Post.objects
+            .filter(status='published')
+            .select_related('author', 'category')
+        )
+
+
+# AUTHOR/ADMIN VIEWS
 class PostCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Post
     fields = ['title', 'category', 'content', 'status']
@@ -26,7 +62,6 @@ class PostCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return super().form_valid(form)
 
 
-# Update View
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin, UpdateView):
     model = Post
     fields = ['title', 'category', 'content', 'status']
@@ -48,7 +83,6 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixi
         return super().form_valid(form)
 
 
-# Delete View
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
     template_name = 'blog/post_confirm_delete.html'
