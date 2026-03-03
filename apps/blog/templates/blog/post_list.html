@@ -9,7 +9,12 @@
             {{ post.title }}
         </a>
     </h2>
-    <p>By {{ post.author }} | {{ post.created_at }}</p>
+    <p>By {{ post.author.username }} | {{ post.created_at }}</p>
+
+    {% if user == post.author or user.is_staff %}
+          <a href="{% url 'blog:post_update' post.slug %}">Edit</a>
+          <a href="{% url 'blog:post_delete' post.slug %}">Delete</a>
+    {% endif %}
     <p>{{ post.content|truncatewords:20 }}</p>
 {% empty %}
     <p>No posts available.</p>
