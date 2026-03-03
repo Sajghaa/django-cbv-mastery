@@ -7,7 +7,7 @@ from .views import (
     PostDeleteView,
     )
 
-app_name ="apps.blog"
+app_name ="blog"
 
 urlpatterns = [
     path('', PostListView.as_view(), name='post_list'),
