@@ -126,6 +126,13 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Authentication settings
+# Custom user model
+AUTH_USER_MODEL = 'users.User'
+
+# Authentication URLs
+LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'blog:post_list'
 LOGOUT_REDIRECT_URL = 'core:home'
-LOGIN_URL = 'login'
+
+# Email settings (for development)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
